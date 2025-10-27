@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <title>The Eternal</title>
+    
+    <!-- Tailwind CSS CDN --><script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- three.js (for 3D space background) CDN --><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Google Font: Orbitron (for titles) & Inter (for body text) --><link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Default for body text */
+            overflow: hidden; /* Prevents scrollbars from the canvas */
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Orbitron', sans-serif; /* For titles and headers */
+        }
+
+        /* This will be our 3D background */
+        #space-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        /* This container holds all UI content */
+        #app-container {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Custom glow effect for the title - IMPROVED */
+        .title-glow {
+            text-shadow: 
+                0 0 10px rgba(173, 216, 230, 0.4), /* Light blue inner glow */
+                0 0 20px rgba(173, 216, 230, 0.3), /* Medium blue glow */
+                0 0 30px rgba(173, 216, 230, 0.2), /* Wider blue glow */
+                0 0 40px rgba(173, 216, 230, 0.1); /* Fainter, largest blue glow */
+            color: #E0F7FA; /* Slightly off-white for the text itself */
+        }
+        
+        /* Custom focus styles for input */
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #90CDF4; /* Lighter blue on focus */
+            box-shadow: 0 0 15px rgba(144, 205, 244, 0.5); /* Blue glow on focus */
+        }
+
+        /* Button hover effect - slightly adjusted for glow feel */
+        #begin-button:hover, .admin-save-button:hover, #add-student-button:hover, #delete-confirm-button:hover {
+            background-color: #E0F7FA; /* Lighter hover */
+            color: #000;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(224, 247, 250, 0.6); /* Soft glow on hover */
+        }
+        
+        .admin-delete-button {
+             /* Custom class for delete button */
+             color: #F87171; /* red-400 */
+             border-color: #F87171;
+        }
+        
+        .admin-delete-button:hover {
+            background-color: rgba(248, 113, 113, 0.1); /* red-400 with 10% opacity */
+            border-color: #FCA5A5; /* red-300 */
+            color: #FCA5A5;
+        }
+
+        #back-button:hover, #admin-back-button:hover, .admin-edit-button:hover, .admin-cancel-button:hover, #delete-cancel-button:hover {
+            background-color: rgba(224, 247, 250, 0.1); /* Lighter hover */
+            border-color: rgba(224, 247, 250, 0.3);
+        }
+
+        /* Page transition styles - UPDATED */
+        .page {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            width: 100%; /* Ensure pages take full width */
+        }
+        .page-hidden {
+            opacity: 0;
+            transform: translateY(20px) scale(1); /* Slide up from bottom */
+            pointer-events: none;
+            position: absolute; /* Allows pages to stack */
+        }
+        .page-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            position: relative; /* Take up space */
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal.modal-visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-content {
+            transform: scale(0.95);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal.modal-visible .modal-content {
+            transform: scale(1);
+        }
+
+    </style>
+</head>
+<body class="bg-black text-white h-screen w-screen overflow-hidden">
+
+    <!-- 3D Background Canvas --><canvas id="space-canvas"></canvas>
+
+    <!-- UI Container --><main id="app-container" class="h-full w-full flex items-center justify-center p-4 overflow-y-auto">
+
+        <!-- Page 1: Landing / Name Input --><div id="landing-page" class="page page-visible w-full max-w-lg flex flex-col items-center">
+            <!-- UPDATED: Removed border, changed bg, increased blur -->
+            <div class="w-full p-8 sm:p-12 bg-black/30 backdrop-blur-lg rounded-2xl shadow-2xl text-center">
+                <h1 class="text-5xl md:text-6xl font-bold title-glow mb-4">The Eternal</h1>
+                <p class="text-lg text-white/70 mb-8">Enter your name to view your learning path.</p>
+                
+                <div class="flex flex-col space-y-4">
+                    <input 
+                        type="text" 
+                        id="name-input"
+                        placeholder="Your Full Name"
+                        class="w-full px-5 py-3 bg-white/5 text-white placeholder-white/50 border border-white/10 rounded-lg transition-all duration-300"
+                    >
+                    <button 
+                        id="begin-button"
+                        class="w-full px-5 py-3 bg-white text-gray-900 font-bold rounded-lg transition-all duration-300 transform shadow-lg"
+                    >
+                        Begin
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 2: Feedback Display --><div id="feedback-page" class="page page-hidden w-full max-w-2xl">
+            <!-- UPDATED: Removed border, changed bg, increased blur -->
+            <div class="w-full p-8 sm:p-12 bg-black/30 backdrop-blur-lg rounded-2xl shadow-2xl">
+                <h2 class="text-3xl font-bold mb-2">Welcome, <span id="student-name" class="title-glow"></span></h2>
+                <h3 id="path-title" class="text-2xl text-cyan-300 mb-6"></h3>
+                
+                <div class="text-white/80 space-y-4 leading-relaxed">
+                    <p id="path-feedback"></p>
+                </div>
+                
+                <button 
+                    id="back-button"
+                    class="mt-8 px-6 py-2 bg-transparent text-white/80 font-semibold rounded-lg transition-all duration-300 border border-white/20"
+                >
+                    &larr; Back
+                </button>
+            </div>
+        </div>
+        
+        <!-- Page 3: Admin Panel (NEW) --><div id="admin-page" class="page page-hidden w-full max-w-4xl">
+            <div class="w-full p-8 sm:p-12 bg-black/30 backdrop-blur-lg rounded-2xl shadow-2xl">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+                    <h2 class="text-3xl font-bold title-glow">Admin Panel</h2>
+                    <div class="flex gap-4">
+                        <button 
+                            id="add-student-button"
+                            class="px-6 py-2 bg-white text-gray-900 font-bold rounded-lg transition-all duration-300 transform shadow-lg"
+                        >
+                            + Add Student
+                        </button>
+                        <button 
+                            id="admin-back-button"
+                            class="px-6 py-2 bg-transparent text-white/80 font-semibold rounded-lg transition-all duration-300 border border-white/20"
+                        >
+                            &larr; Back
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="student-list-container" class="space-y-4">
+                    <!-- Student list will be dynamically populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Message Box for Errors --><div id="message-box" class="hidden fixed top-5 left-1/2 -translate-x-1/2 bg-red-600/80 text-white px-6 py-3 rounded-lg shadow-lg backdrop-blur-sm transition-all duration-300 z-50">
+            <span id="message-text"></span>
+            <button id="close-message" class="ml-4 font-bold">&times;</button>
+        </div>
+
+        <!-- Edit/Add Student Modal (NEW) --><div id="edit-modal" class="modal hidden">
+            <div id="edit-modal-content" class="modal-content w-full max-w-lg p-8 bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10">
+                <h3 id="edit-modal-title" class="text-2xl font-bold mb-6 title-glow">Edit Path</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="edit-student-name" class="block text-sm font-medium text-white/70 mb-1">Student Name</label>
+                        <input 
+                            type="text" 
+                            id="edit-student-name"
+                            class="w-full px-4 py-2 bg-white/5 text-white placeholder-white/50 border border-white/10 rounded-lg transition-all duration-300"
+                        >
+                    </div>
+                    <div>
+                        <label for="edit-path-title" class="block text-sm font-medium text-white/70 mb-1">Path Title</label>
+                        <input 
+                            type="text" 
+                            id="edit-path-title"
+                            class="w-full px-4 py-2 bg-white/5 text-white placeholder-white/50 border border-white/10 rounded-lg transition-all duration-300"
+                        >
+                    </div>
+                    <div>
+                        <label for="edit-path-feedback" class="block text-sm font-medium text-white/70 mb-1">Feedback</label>
+                        <textarea 
+                            id="edit-path-feedback" 
+                            rows="6"
+                            class="w-full px-4 py-2 bg-white/5 text-white placeholder-white/50 border border-white/10 rounded-lg transition-all duration-300"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4 mt-8">
+                    <button id="admin-cancel-button" class="px-6 py-2 bg-transparent text-white/80 font-semibold rounded-lg transition-all duration-300 border border-white/20">
+                        Cancel
+                    </button>
+                    <button id="admin-save-button" class="px-6 py-2 bg-white text-gray-900 font-bold rounded-lg transition-all duration-300 transform shadow-lg">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Delete Confirmation Modal (NEW) --><div id="delete-modal" class="modal hidden">
+            <div class="modal-content w-full max-w-md p-8 bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10">
+                <h3 class="text-2xl font-bold mb-4 title-glow">Confirm Deletion</h3>
+                <p class="text-white/80 mb-6">Are you sure you want to delete the path for <strong id="delete-student-name"></strong>? This action cannot be undone.</p>
+                <div class="flex justify-end space-x-4">
+                    <button id="delete-cancel-button" class="px-6 py-2 bg-transparent text-white/80 font-semibold rounded-lg transition-all duration-300 border border-white/20">
+                        Cancel
+                    </button>
+                    <button id="delete-confirm-button" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg transition-all duration-300 transform shadow-lg">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    </main>
+
+    <script>
+        // --- Mock Student Database ---
+        // CHANGED TO LET: Made this 'let' so it can be modified by the admin panel.
+        let studentData = {
+            "aahana mukherjee": {
+                title: "Path of the Luminary Artist",
+                feedback: "Aahana, your creativity is a brilliant light. You bring a unique and insightful perspective to every project, blending technical skill with pure artistry. Your recent work on color theory was exceptional. To further hone your path, begin exploring the intersection of digital art and traditional media. Your vision is clear and compelling."
+            },
+            "suhani hankare": {
+                title: "The Inquisitive Engineer's Design",
+                feedback: "Suhani, your analytical mind and relentless curiosity are the hallmarks of a great engineer. You deconstruct complex problems with patience and precision. Your prototype for the physics challenge was a testament to your strong design principles. Your next step is to focus on software simulation to test your designs before you build. Keep questioning everything."
+            },
+            "alexandra chen": {
+                title: "Path of the Celestial Voyager",
+                feedback: "Alexandra, your progress in astrophysics is stellar. You navigate complex concepts with ease, much like a voyager charting unknown galaxies. Your recent project on exoplanet atmospheres was particularly insightful. For your next step, focus on the mathematical models of stellar evolution. Your curiosity is your greatest engine."
+            },
+            "david lee": {
+                title: "The Quantum Architect's Blueprint",
+                feedback: "David, your logical mind is perfectly suited for the quantum realm. You build arguments with precision, like an architect designing a flawless structure. Your grasp of quantum mechanics is strong, but to deepen your understanding, try to visualize the wave-particle duality experiments. Your foundation is solid; now, build upwards."
+            },
+            "priya sharma": {
+                title: "The Bio-Weaver's Tapestry",
+                feedback: "Priya, you have a unique talent for seeing the connections in biological systems, weaving disparate threads into a coherent whole. Your work on genetic expression was beautifully detailed. The next thread to pull is epigenetics—explore how environment shapes the tapestry of life. Your intuitive understanding is a rare gift."
+            },
+            "michael ortega": {
+                title: "Codex of the Digital Alchemist",
+                feedback: "Michael, you turn raw logic into functional art, like a true digital alchemist. Your mastery of Python and data structures is impressive. Your code is clean, but your next challenge is scale. Begin exploring distributed systems and how to maintain elegance when your creations serve millions. The world is ready for your gold."
+            }
+        };
+
+        // --- UI Element References ---
+        const landingPage = document.getElementById('landing-page');
+        const feedbackPage = document.getElementById('feedback-page');
+        const adminPage = document.getElementById('admin-page'); // NEW
+        const nameInput = document.getElementById('name-input');
+        const beginButton = document.getElementById('begin-button');
+        const backButton = document.getElementById('back-button');
+        const adminBackButton = document.getElementById('admin-back-button'); // NEW
+
+        // Feedback display elements
+        const studentName = document.getElementById('student-name');
+        const pathTitle = document.getElementById('path-title');
+        const pathFeedback = document.getElementById('path-feedback');
+
+        // Message box elements
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessage = document.getElementById('close-message');
+
+        // Admin Panel elements (NEW)
+        const studentListContainer = document.getElementById('student-list-container');
+        const addStudentButton = document.getElementById('add-student-button'); // NEW
+        
+        // Edit Modal
+        const editModal = document.getElementById('edit-modal');
+        const editModalTitle = document.getElementById('edit-modal-title'); // NEW
+        const editStudentName = document.getElementById('edit-student-name');
+        const editPathTitle = document.getElementById('edit-path-title');
+        const editPathFeedback = document.getElementById('edit-path-feedback');
+        const adminCancelButton = document.getElementById('admin-cancel-button');
+        const adminSaveButton = document.getElementById('admin-save-button');
+        
+        // Delete Modal (NEW)
+        const deleteModal = document.getElementById('delete-modal');
+        const deleteStudentName = document.getElementById('delete-student-name');
+        const deleteCancelButton = document.getElementById('delete-cancel-button');
+        const deleteConfirmButton = document.getElementById('delete-confirm-button');
+        
+        let currentEditingKey = null; // Store which student is being edited
+        let currentDeletingKey = null; // NEW: Store which student is being deleted
+
+        // --- Page Navigation ---
+        function showPage(pageToShow) {
+            // Hide all pages
+            landingPage.classList.remove('page-visible');
+            landingPage.classList.add('page-hidden');
+            feedbackPage.classList.remove('page-visible');
+            feedbackPage.classList.add('page-hidden');
+            adminPage.classList.remove('page-visible'); // NEW
+            adminPage.classList.add('page-hidden'); // NEW
+
+            // Show the target page
+            if (pageToShow === 'feedback') {
+                feedbackPage.classList.remove('page-hidden');
+                feedbackPage.classList.add('page-visible');
+            } else if (pageToShow === 'admin') { // NEW
+                populateAdminPanel(); // Refresh admin list every time it's shown
+                adminPage.classList.remove('page-hidden');
+                adminPage.classList.add('page-visible');
+            } else { // Default to landing
+                landingPage.classList.remove('page-hidden');
+                landingPage.classList.add('page-visible');
+            }
+        }
+        
+        // --- Message Box Logic ---
+        function showMessage(message, isError = true) {
+            messageText.textContent = message;
+            // NEW: Change color based on message type
+            if (isError) {
+                messageBox.classList.remove('bg-green-600/80');
+                messageBox.classList.add('bg-red-600/80');
+            } else {
+                messageBox.classList.remove('bg-red-600/80');
+                messageBox.classList.add('bg-green-600/80');
+            }
+            messageBox.classList.remove('hidden');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 3000);
+        }
+        closeMessage.addEventListener('click', () => {
+            messageBox.classList.add('hidden');
+        });
+
+        // --- Event Listeners ---
+        beginButton.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            const nameKey = name.toLowerCase();
+
+            if (!name) {
+                showMessage("Please enter your name.");
+                return;
+            }
+            
+            // NEW: Admin panel check
+            if (nameKey === "mui") {
+                showPage('admin');
+                nameInput.value = ''; // Clear input
+                return;
+            }
+
+            const data = studentData[nameKey];
+
+            if (data) {
+                // Populate feedback page
+                studentName.textContent = name; // Use original capitalization
+                pathTitle.textContent = data.title;
+                pathFeedback.textContent = data.feedback;
+                
+                // Switch pages
+                showPage('feedback');
+            } else {
+                // Student not found
+                showMessage("Student not found. Please check your spelling.");
+            }
+        });
+
+        // Allow pressing Enter to submit
+        nameInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                beginButton.click();
+            }
+        });
+
+        backButton.addEventListener('click', () => {
+            showPage('landing');
+            // Clear the input for the next user
+            nameInput.value = '';
+        });
+        
+        // --- Admin Panel Logic (NEW) ---
+        adminBackButton.addEventListener('click', () => {
+            showPage('landing');
+            nameInput.value = ''; // Clear input
+        });
+
+        function populateAdminPanel() {
+            studentListContainer.innerHTML = ''; // Clear existing list
+            
+            const keys = Object.keys(studentData);
+            if (keys.length === 0) {
+                studentListContainer.innerHTML = '<p class="text-white/50">No students found. Click "Add Student" to begin.</p>';
+                return;
+            }
+            
+            // Sort keys alphabetically
+            keys.sort();
+            
+            keys.forEach(key => {
+                const student = studentData[key];
+                const studentEl = document.createElement('div');
+                studentEl.className = "p-4 bg-white/5 border border-white/10 rounded-lg flex flex-col sm:flex-row justify-between sm:items-center gap-4";
+                studentEl.innerHTML = `
+                    <div class="flex-1">
+                        <h4 class="text-lg font-semibold text-cyan-300">${student.title}</h4>
+                        <p class="text-sm text-white/70">${key}</p>
+                    </div>
+                    <div class="flex gap-4 flex-shrink-0">
+                        <button 
+                            data-key="${key}" 
+                            class="admin-edit-button px-4 py-2 bg-transparent text-white/80 font-semibold rounded-lg transition-all duration-300 border border-white/20"
+                        >
+                            Edit
+                        </button>
+                        <button 
+                            data-key="${key}" 
+                            class="admin-delete-button px-4 py-2 bg-transparent font-semibold rounded-lg transition-all duration-300 border"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                `;
+                studentListContainer.appendChild(studentEl);
+            });
+            
+            // Add event listeners to the new buttons
+            document.querySelectorAll('.admin-edit-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const key = e.currentTarget.dataset.key;
+                    openEditModal(key);
+                });
+            });
+            
+            document.querySelectorAll('.admin-delete-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const key = e.currentTarget.dataset.key;
+                    openDeleteModal(key);
+                });
+            });
+        }
+        
+        // --- Add/Edit Modal Logic ---
+        addStudentButton.addEventListener('click', () => {
+            openEditModal(null); // Call with null key for "add" mode
+        });
+        
+        function openEditModal(key) {
+            if (key) {
+                // Edit Mode
+                currentEditingKey = key;
+                const student = studentData[key];
+                
+                editModalTitle.textContent = "Edit Path";
+                editStudentName.value = key; // Show the key
+                editStudentName.readOnly = true; // Make name non-editable
+                editStudentName.classList.add('text-white/50'); // Style as readonly
+                
+                editPathTitle.value = student.title;
+                editPathFeedback.value = student.feedback;
+            } else {
+                // Add Mode
+                currentEditingKey = null; // Ensure no key is set
+                
+                editModalTitle.textContent = "Add New Student";
+                editStudentName.value = ""; // Clear fields
+                editStudentName.readOnly = false; // Make name editable
+                editStudentName.classList.remove('text-white/50');
+                editStudentName.placeholder = "Full Name (e.g. john doe)";
+                
+                editPathTitle.value = "";
+                editPathTitle.placeholder = "Path of the...";
+                
+                editPathFeedback.value = "";
+                editPathFeedback.placeholder = "Enter student feedback...";
+            }
+            
+            editModal.classList.remove('hidden');
+            setTimeout(() => editModal.classList.add('modal-visible'), 10); // Fade in
+        }
+        
+        function closeEditModal() {
+            editModal.classList.remove('modal-visible');
+            setTimeout(() => editModal.classList.add('hidden'), 300); // Wait for fade out
+            currentEditingKey = null;
+        }
+
+        adminCancelButton.addEventListener('click', closeEditModal);
+
+        adminSaveButton.addEventListener('click', () => {
+            const title = editPathTitle.value.trim();
+            const feedback = editPathFeedback.value.trim();
+            
+            if (currentEditingKey) {
+                // --- UPDATE (Edit) LOGIC ---
+                studentData[currentEditingKey] = {
+                    title: title,
+                    feedback: feedback
+                };
+                
+                closeEditModal();
+                populateAdminPanel(); // Refresh the list
+                showMessage("Changes saved successfully.", false);
+            } else {
+                // --- ADD (New) LOGIC ---
+                const newName = editStudentName.value.trim();
+                const newKey = newName.toLowerCase();
+                
+                if (!newName) {
+                    showMessage("Student name cannot be empty.");
+                    return;
+                }
+                if (!title || !feedback) {
+                    showMessage("Title and feedback cannot be empty.");
+                    return;
+                }
+                if (studentData[newKey]) {
+                    showMessage("A student with this name already exists.");
+                    return;
+                }
+                
+                // Add new student
+                studentData[newKey] = {
+                    title: title,
+                    feedback: feedback
+                };
+                
+                closeEditModal();
+                populateAdminPanel(); // Refresh the list
+                showMessage("Student added successfully.", false);
+            }
+        });
+        
+        // --- Delete Modal Logic (NEW) ---
+        function openDeleteModal(key) {
+            currentDeletingKey = key;
+            deleteStudentName.textContent = key; // Show name in confirmation text
+            deleteModal.classList.remove('hidden');
+            setTimeout(() => deleteModal.classList.add('modal-visible'), 10);
+        }
+        
+        function closeDeleteModal() {
+            deleteModal.classList.remove('modal-visible');
+            setTimeout(() => deleteModal.classList.add('hidden'), 300);
+            currentDeletingKey = null;
+        }
+        
+        deleteCancelButton.addEventListener('click', closeDeleteModal);
+        
+        deleteConfirmButton.addEventListener('click', () => {
+            if (currentDeletingKey) {
+                delete studentData[currentDeletingKey]; // Delete from object
+                
+                closeDeleteModal();
+                populateAdminPanel(); // Refresh list
+                showMessage("Student deleted successfully.", false);
+            }
+        });
+        
+
+        // --- Three.js Realistic Space Background ---
+        let scene, camera, renderer, stars;
+
+        function initSpace() {
+            // Scene
+            scene = new THREE.Scene();
+
+            // Camera - UPDATED FOV and near/far planes
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.z = 0; // Camera is at the origin
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({
+                canvas: document.getElementById('space-canvas'),
+                antialias: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+
+            // Starfield - UPDATED logic for 'warp speed'
+            const starVertices = [];
+            for (let i = 0; i < 6000; i++) {
+                const x = THREE.MathUtils.randFloatSpread(1000); // Random x in [-500, 500]
+                const y = THREE.MathUtils.randFloatSpread(1000); // Random y in [-500, 500]
+                const z = THREE.MathUtils.randFloat(-1000, 0);  // Random z in [-1000, 0] (in front of camera)
+                starVertices.push(x, y, z);
+            }
+
+            const starGeometry = new THREE.BufferGeometry();
+            // FIX: Changed Float33BufferAttribute to Float32BufferAttribute
+            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+
+            const starMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.7,
+                transparent: true,
+                opacity: 0.8,
+                sizeAttenuation: true
+            });
+
+            stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+
+            // Handle Window Resize
+            window.addEventListener('resize', onWindowResize, false);
+            
+            // Start Animation
+            animate();
+        }
+
+        // Animation Loop - UPDATED for star movement
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Move stars towards the camera
+            const positions = stars.geometry.attributes.position.array;
+
+            for (let i = 0; i < positions.length; i += 3) {
+                // Update the z position
+                positions[i + 2] += 0.2; // Adjust speed here
+
+                // If star passes camera (z > 0), reset it to the back
+                if (positions[i + 2] > 0) {
+                    positions[i + 2] = -1000;
+                }
+            }
+
+            // Tell Three.js that the positions have changed
+            stars.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+
+        // Resize Handler
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Initialize the 3D background
+        initSpace();
+
+    </script>
+</body>
+</html>
+
