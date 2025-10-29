@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aahana's Learning Adventure</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Fredoka One (Bubbly) & Nunito (Readable) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom styles for the kid-friendly theme */
+        body {
+            /* Cheerful gradient background */
+            background: linear-gradient(135deg, #a8e0ff 0%, #ffe9a8 100%);
+            font-family: 'Nunito', sans-serif; /* Default readable font */
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Fredoka One', cursive; /* Fun, bubbly font for headers */
+        }
+
+        /* Fun animation for the cards */
+        @keyframes bounce-in {
+            0% {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.02);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1; /* FIX: Explicitly set opacity: 1 at 100% */
+            }
+        }
+        
+        .adventure-card {
+            animation: bounce-in 0.6s ease-out forwards;
+        }
+
+        /* Staggering the animation for each card */
+        .adventure-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+        .adventure-card:nth-child(2) {
+            animation-delay: 0.25s;
+        }
+        .adventure-card:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        /* NEW: Animation for the main header */
+        @keyframes subtle-pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.03);
+            }
+        }
+        
+        h1 {
+            /* Apply the new animation */
+            animation: subtle-pulse 3s ease-in-out infinite;
+        }
+
+        /* NEW: Styles for fun icons */
+        .fun-icon {
+            width: 4rem;  /* 64px */
+            height: 4rem; /* 64px */
+            flex-shrink: 0; /* Prevent shrinking */
+            transition: transform 0.3s ease; /* Add transition for hover */
+        }
+        
+        .fun-icon-small {
+            width: 2.5rem; /* 40px */
+            height: 2.5rem; /* 40px */
+            margin-right: 0.75rem; /* 12px */
+            flex-shrink: 0;
+            transition: transform 0.3s ease; /* Add transition for hover */
+        }
+
+        /* NEW: Hover effect for icons */
+        .adventure-card:hover .fun-icon {
+            transform: rotate(-10deg) scale(1.1);
+        }
+        .adventure-card:hover .fun-icon-small {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen w-screen flex items-center justify-center p-4">
+
+    <!-- Main Content Container -->
+    <main class="w-full max-w-4xl mx-auto">
+        
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl text-white" style="text-shadow: 2px 2px 0px #f89a7a;">
+                Welcome, Aahana!
+            </h1>
+            <p class="text-xl sm:text-2xl text-gray-700 font-bold mt-2">Let's start our adventure!</p>
+        </header>
+
+        <!-- Main Content Cards -->
+        <!-- Using flex-wrap for responsiveness: cards stack on mobile and go side-by-side on larger screens -->
+        <div class="flex flex-wrap justify-center gap-6 md:gap-8">
+
+            <!-- Card 1: Current Level -->
+            <div class="adventure-card w-full sm:w-80 p-6 bg-white rounded-2xl shadow-xl border-4 border-yellow-300 opacity-0">
+                <div class="flex items-center space-x-4">
+                    <!-- Icon: Happy Sprout -->
+                    <svg class="fun-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Pot -->
+                        <path d="M14 54h36v-8H14v8z" fill="#F4A261"/>
+                        <path d="M18 46h28v-6H18v6z" fill="#E76F51"/>
+                        <!-- Stem -->
+                        <path d="M30 40c0-10 4-18 4-18" stroke="#84A98C" stroke-width="4" stroke-linecap="round"/>
+                        <!-- Leaves -->
+                        <path d="M34 22c0 0-8-4-12-10 6 6 10 14 10 14" fill="#A9D6A4"/>
+                        <path d="M34 22c0 0 8-4 12-10-6 6-10 14-10 14" fill="#A9D6A4"/>
+                        <!-- Face -->
+                        <circle cx="28" cy="30" r="1.5" fill="#264653"/>
+                        <circle cx="40" cy="30" r="1.5" fill="#264653"/>
+                        <path d="M30 36s2 3 4 3 4-3 4-3" stroke="#264653" stroke-width="2" fill="none" stroke-linecap="round"/>
+                    </svg>
+                    <div>
+                        <h2 class="text-lg text-gray-500">Your Level</h2>
+                        <h3 class="text-3xl text-green-600">Beginner</h3>
+                    </div>
+                </div>
+                <!-- Simple "Progress" Bar -->
+                <div class="w-full bg-gray-200 rounded-full h-4 mt-4 overflow-hidden border border-gray-300">
+                    <div class="bg-green-500 h-full rounded-full" style="width: 25%"></div>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">You're just getting started!</p>
+            </div>
+
+            <!-- Card 2: Today's Topic -->
+            <div class="adventure-card w-full sm:w-80 p-6 bg-white rounded-2xl shadow-xl border-4 border-blue-300 opacity-0">
+                <div class="flex items-center space-x-4 mb-4">
+                    <!-- Icon: Magic Book -->
+                    <svg class="fun-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M52 52H18c-3.3 0-6-2.7-6-6V18c0-3.3 2.7-6 6-6h34v40z" fill="#60A5FA"/>
+                        <path d="M12 12h34v40H18c-3.3 0-6-2.7-6-6V18c0-3.3 2.7-6 6-6z" fill="#3B82F6"/>
+                        <path d="M31 12v40" stroke="#1E40AF" stroke-width="2"/>
+                        <!-- Stars -->
+                        <path d="M40 18l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5 1.5-3z" fill="#FBBF24"/>
+                        <path d="M48 25l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z" fill="#FBBF24"/>
+                        <path d="M20 35l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z" fill="#FBBF24"/>
+                    </svg>
+                    <h2 class="text-3xl text-blue-600">Today's Topics</h2>
+                </div>
+                <ul class="space-y-3 text-left">
+                    <li class="flex items-center text-xl text-gray-700 font-semibold">
+                        <!-- Division Icon -->
+                        <svg class="fun-icon-small" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="40" height="40" rx="8" fill="#F3E8FF"/>
+                            <circle cx="20" cy="12" r="4" fill="#9333EA"/>
+                            <path d="M8 20h24" stroke="#9333EA" stroke-width="3" stroke-linecap="round"/>
+                            <circle cx="20" cy="28" r="4" fill="#9333EA"/>
+                        </svg>
+                        Maths - Division
+                    </li>
+                    <li class="flex items-center text-xl text-gray-700 font-semibold">
+                        <!-- Apple Icon -->
+                        <svg class="fun-icon-small" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="40" height="40" rx="8" fill="#FEF2F2"/>
+                            <path d="M29 18c0-5-4-9-9-9s-9 4-9 9c0 4 2.5 7.4 6 8.5v5c0 .6.4 1 1 1h4c.6 0 1-.4 1-1v-5c3.5-1.1 6-4.5 6-8.5z" fill="#EF4444"/>
+                            <path d="M23 10c1 0 2-2 1-4s-3 1-3 1c-.5 1.5 1 3 1 3z" fill="#16A34A"/>
+                        </svg>
+                        EVS - Food
+                    </li>
+                </ul>
+                <!-- REMOVED Start Learning Button -->
+            </div>
+
+            <!-- Card 3: Upcoming Test -->
+            <div class="adventure-card w-full sm:w-80 p-6 bg-white rounded-2xl shadow-xl border-4 border-red-300 opacity-0">
+                <div class="flex items-center space-x-4 mb-4">
+                    <!-- Icon: Fun Calendar -->
+                    <svg class="fun-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Page -->
+                        <path d="M12 14h40v40H12V14z" fill="#FFF" stroke="#E5E7EB" stroke-width="2"/>
+                        <!-- Header -->
+                        <path d="M52 22v-8c0-1.1-.9-2-2-2H14c-1.1 0-2 .9-2 2v8" fill="#EF4444"/>
+                        <!-- Rings -->
+                        <circle cx="24" cy="14" r="3" fill="#6B7281"/>
+                        <circle cx="40" cy="14" r="3" fill="#6B7281"/>
+                        <!-- Date Circle -->
+                        <circle cx="32" cy="38" r="12" fill="#FEF2F2" stroke="#DC2626" stroke-width="3"/>
+                        <text x="32" y="43" font-family="Fredoka One, cursive" font-size="14" fill="#DC2626" text-anchor="middle">31</text>
+                        <!-- Star -->
+                        <path d="M45 48l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5 1.5-3z" fill="#FBBF24"/>
+                    </svg>
+                    <h2 class="text-3xl text-red-600">Get Ready!</h2>
+                </div>
+                <h3 class="text-xl text-gray-700 font-semibold">Upcoming Test</h3>
+                <p class="text-2xl text-red-500 font-bold my-2">EVS Test</p>
+                <p class="text-lg text-gray-700 font-semibold">
+                    October 31, 2025
+                </p>
+                <p class="text-md text-red-600 font-bold bg-red-100 rounded-lg px-3 py-1 mt-3 inline-block">
+                    Just 2 days away!
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Back Button -->
+        <footer class="text-center mt-10">
+            <a 
+                href="the_eternal.html" 
+                class="inline-block px-8 py-3 bg-white text-gray-800 font-bold rounded-xl transition-all duration-300 transform shadow-lg hover:scale-105 hover:bg-gray-200 border-2 border-gray-300"
+            >
+                &larr; Back to Main Page
+            </a>
+        </footer>
+
+    </main>
+
+</body>
+</html>
+
+
+
