@@ -2,14 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Eternal</title>
     
-    <!-- Tailwind CSS CDN --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- three.js (for 3D space background) CDN --><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Google Font: Orbitron (for titles) & Inter (for body text) --><link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <!-- three.js (for 3D space background) CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Google Font: Orbitron (for titles) & Inter (for body text) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     
     <style>
@@ -130,11 +134,14 @@
 </head>
 <body class="bg-black text-white h-screen w-screen overflow-hidden">
 
-    <!-- 3D Background Canvas --><canvas id="space-canvas"></canvas>
+    <!-- 3D Background Canvas -->
+    <canvas id="space-canvas"></canvas>
 
-    <!-- UI Container --><main id="app-container" class="h-full w-full flex items-center justify-center p-4 overflow-y-auto">
+    <!-- UI Container -->
+    <main id="app-container" class="h-full w-full flex items-center justify-center p-4 overflow-y-auto">
 
-        <!-- Page 1: Landing / Name Input --><div id="landing-page" class="page page-visible w-full max-w-lg flex flex-col items-center">
+        <!-- Page 1: Landing / Name Input -->
+        <div id="landing-page" class="page page-visible w-full max-w-lg flex flex-col items-center">
             <!-- UPDATED: Removed border, changed bg, increased blur -->
             <div class="w-full p-8 sm:p-12 bg-black/30 backdrop-blur-lg rounded-2xl shadow-2xl text-center">
                 <h1 class="text-5xl md:text-6xl font-bold title-glow mb-4">The Eternal</h1>
@@ -157,7 +164,8 @@
             </div>
         </div>
 
-        <!-- Page 2: Feedback Display --><div id="feedback-page" class="page page-hidden w-full max-w-2xl">
+        <!-- Page 2: Feedback Display -->
+        <div id="feedback-page" class="page page-hidden w-full max-w-2xl">
             <!-- UPDATED: Removed border, changed bg, increased blur -->
             <div class="w-full p-8 sm:p-12 bg-black/30 backdrop-blur-lg rounded-2xl shadow-2xl">
                 <h2 class="text-3xl font-bold mb-2">Welcome, <span id="student-name" class="title-glow"></span></h2>
@@ -176,7 +184,8 @@
             </div>
         </div>
         
-        <!-- Page 3: Admin Panel (NEW) --><div id="admin-page" class="page page-hidden w-full max-w-4xl">
+        <!-- Page 3: Admin Panel (NEW) -->
+        <div id="admin-page" class="page page-hidden w-full max-w-4xl">
             <div class="w-full p-8 sm:p-12 bg-black/30 backdrop-blur-lg rounded-2xl shadow-2xl">
                 <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
                     <h2 class="text-3xl font-bold title-glow">Admin Panel</h2>
@@ -202,12 +211,14 @@
             </div>
         </div>
 
-        <!-- Message Box for Errors --><div id="message-box" class="hidden fixed top-5 left-1/2 -translate-x-1/2 bg-red-600/80 text-white px-6 py-3 rounded-lg shadow-lg backdrop-blur-sm transition-all duration-300 z-50">
+        <!-- Message Box for Errors -->
+        <div id="message-box" class="hidden fixed top-5 left-1/2 -translate-x-1/2 bg-red-600/80 text-white px-6 py-3 rounded-lg shadow-lg backdrop-blur-sm transition-all duration-300 z-50">
             <span id="message-text"></span>
             <button id="close-message" class="ml-4 font-bold">&times;</button>
         </div>
 
-        <!-- Edit/Add Student Modal (NEW) --><div id="edit-modal" class="modal hidden">
+        <!-- Edit/Add Student Modal (NEW) -->
+        <div id="edit-modal" class="modal hidden">
             <div id="edit-modal-content" class="modal-content w-full max-w-lg p-8 bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10">
                 <h3 id="edit-modal-title" class="text-2xl font-bold mb-6 title-glow">Edit Path</h3>
                 
@@ -249,7 +260,8 @@
             </div>
         </div>
         
-        <!-- Delete Confirmation Modal (NEW) --><div id="delete-modal" class="modal hidden">
+        <!-- Delete Confirmation Modal (NEW) -->
+        <div id="delete-modal" class="modal hidden">
             <div class="modal-content w-full max-w-md p-8 bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10">
                 <h3 class="text-2xl font-bold mb-4 title-glow">Confirm Deletion</h3>
                 <p class="text-white/80 mb-6">Are you sure you want to delete the path for <strong id="delete-student-name"></strong>? This action cannot be undone.</p>
@@ -392,6 +404,12 @@
             if (!name) {
                 showMessage("Please enter your name.");
                 return;
+            }
+
+            // NEW: Special check for Aahana Mukherjee
+            if (nameKey === "aahana mukherjee") {
+                window.location.href = 'aamu.html'; // Redirect to aamu.html
+                return; // Stop further execution
             }
             
             // NEW: Admin panel check
